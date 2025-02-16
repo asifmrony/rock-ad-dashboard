@@ -28,7 +28,7 @@ const AdsList = () => {
   console.log("All ads", allCreatives);
 
   return (
-    <Card className="w-[1000px] mx-auto">
+    <Card className="min-w-[1000px] max-w-[1400px] mx-auto">
       <CardHeader className="flex items-center justify-between flex-row">
         <CardTitle>All Ads List</CardTitle>
         <Link

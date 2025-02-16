@@ -53,8 +53,8 @@ export function DashboardLayout() {
 
   return (
     <SidebarProvider>
-      <div className="min-h-screen flex w-full">
-        <Sidebar>
+      <div className="min-h-screen flex w-full bg-slate-100">
+        <Sidebar className="bg-white">
           <SidebarContent>
             <SidebarGroup>
               <SidebarGroupLabel>Navigation</SidebarGroupLabel>

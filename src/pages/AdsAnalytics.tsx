@@ -40,6 +40,17 @@ const mockAds = [
 
 const AdsAnalytics = () => {
   const [allCreatives, setAllCreatives] = useState([]);
+  const [creativeSummary, setCreativeSummary] = useState({
+    totalImpressions: 0,
+    totalClicks: 0,
+    totalStarts: 0,
+    totalFirstQuartile: 0,
+    totalMidpoint: 0,
+    totalThirdQuartile: 0,
+    totalCompletes: 0,
+    totalSkips: 0,
+    ctr: 0,
+  });
   const [startdate, setStartDate] = useState<Date | undefined>();
   const [endDate, setEndDate] = useState<Date | undefined>();
   const [filterType, setFilterType] = useState<string | undefined>();
@@ -49,7 +60,8 @@ const AdsAnalytics = () => {
       const response = await axios.get(
         `${apiUrl}ads/creatives/creative-analytics`
       );
-      setAllCreatives(response?.data);
+      setAllCreatives(response?.data?.creatives_analytics);
+      setCreativeSummary(response?.data?.ads_total_summation);
     };
     getAllCreatives();
   }, []);
@@ -59,7 +71,8 @@ const AdsAnalytics = () => {
       const response = await axios.get(
         `${apiUrl}ads/creatives/creative-analytics?startdate=${startDate}&enddate=${endDate}`
       );
-      setAllCreatives(response?.data);
+      setAllCreatives(response?.data?.creatives_analytics);
+      setCreativeSummary(response?.data?.ads_total_summation);
     }
 
     function getFilteredDate(dateRange: string) {
@@ -85,6 +98,8 @@ const AdsAnalytics = () => {
       if (filterType === "alltime") {
         // call alltime based api
         callCreativeAPI("all", "all");
+      } else if (filterType === "thisMonth") {
+        callCreativeAPI("", "");
       } else {
         // only last 1 | 3 | 6 Months based api
         console.log("Filter Type", getFilteredDate(filterType));
@@ -117,7 +132,8 @@ const AdsAnalytics = () => {
         `?startdate=${formattedStartDate}&enddate=${formattedEndDate}`
       }`
     );
-    setAllCreatives(response?.data);
+    setAllCreatives(response?.data?.creatives_analytics);
+    setCreativeSummary(response?.data?.ads_total_summation);
   };
 
   return (
@@ -141,6 +157,7 @@ const AdsAnalytics = () => {
             </SelectTrigger>
             <SelectContent>
               <SelectGroup>
+                <SelectItem value="thisMonth">This Month</SelectItem>
                 <SelectItem value="lastMonth">Last Month</SelectItem>
                 <SelectItem value="lastThreeMonth">Last 3 Month</SelectItem>
                 <SelectItem value="lastSixMonth">Last 6 Month</SelectItem>
@@ -325,6 +342,37 @@ const AdsAnalytics = () => {
                 </TableCell> */}
               </TableRow>
             ))}
+
+            <TableRow>
+              <TableCell className="font-medium text-left">Total</TableCell>
+              <TableCell className="font-medium text-center">
+                {creativeSummary?.totalClicks}
+              </TableCell>
+              <TableCell className="text-center">
+                {creativeSummary?.totalClicks}
+              </TableCell>
+              <TableCell className="text-center">
+                {creativeSummary?.totalCompletes}
+              </TableCell>
+              <TableCell className="text-center">
+                {creativeSummary?.totalFirstQuartile}
+              </TableCell>
+              <TableCell className="text-center">
+                {creativeSummary?.totalImpressions}
+              </TableCell>
+              <TableCell className="text-center">
+                {creativeSummary?.totalMidpoint}
+              </TableCell>
+              <TableCell className="text-center">
+                {creativeSummary?.totalSkips}
+              </TableCell>
+              <TableCell className="text-center">
+                {creativeSummary?.totalStarts}
+              </TableCell>
+              <TableCell className="text-center">
+                {creativeSummary?.totalClicks}
+              </TableCell>
+            </TableRow>
           </TableBody>
         </Table>
       </CardContent>

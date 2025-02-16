@@ -149,7 +149,7 @@ const CreateAd = () => {
   };
 
   return (
-    <Card className="max-w-[500px] mx-auto mt-10">
+    <Card className="max-w-[600px] mx-auto mt-10">
       <CardHeader>
         <CardTitle>
           Create New Ad - Step{" "}
