@@ -346,7 +346,7 @@ const AdsAnalytics = () => {
             <TableRow>
               <TableCell className="font-medium text-left">Total</TableCell>
               <TableCell className="font-medium text-center">
-                {creativeSummary?.totalClicks}
+                {creativeSummary?.ctr}
               </TableCell>
               <TableCell className="text-center">
                 {creativeSummary?.totalClicks}
@@ -370,7 +370,7 @@ const AdsAnalytics = () => {
                 {creativeSummary?.totalStarts}
               </TableCell>
               <TableCell className="text-center">
-                {creativeSummary?.totalClicks}
+                {creativeSummary?.totalThirdQuartile}
               </TableCell>
             </TableRow>
           </TableBody>
