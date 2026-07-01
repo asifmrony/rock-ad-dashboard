@@ -13,6 +13,7 @@ import AdsList from "./pages/AdsList";
 import Advertisers from "./pages/Advertisers";
 import Campaigns from "./pages/Campaigns";
 import EditAd from "./pages/EditAd";
+import AdsHome from "./pages/AdsHome";
 
 const queryClient = new QueryClient();
 
@@ -33,7 +34,7 @@ const App = () => (
                 </ProtectedRoute>
               }
             >
-              <Route index element={<AdsAnalytics />} />
+              <Route index element={<AdsHome />} />
               <Route path="ads" element={<AdsList />} />
               <Route path="ads/create" element={<CreateAd />} />
               <Route path="ads/edit/:id" element={<EditAd />} />

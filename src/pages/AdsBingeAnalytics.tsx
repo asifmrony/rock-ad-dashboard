@@ -38,7 +38,7 @@ const mockAds = [
   },
 ];
 
-const AdsAnalytics = () => {
+const AdsBingeAnalytics = () => {
   const [loading, setLoading] = useState(false);
   const [allCreatives, setAllCreatives] = useState([]);
   const [creativeSummary, setCreativeSummary] = useState({
@@ -60,10 +60,14 @@ const AdsAnalytics = () => {
     const getAllCreatives = async () => {
       setLoading(true);
       const response = await axios.get(
-        `${apiUrl}ads/creatives/creative-analytics`,
+        `${apiUrl}ads/creatives/analytics-by-advertisement?advertisement_id=6a20f96349be327667715019`,
       );
-      setAllCreatives(response?.data?.creatives_analytics);
-      setCreativeSummary(response?.data?.ads_total_summation);
+      setAllCreatives(
+        response?.data?.campaigns_analytics?.[1]?.creatives_analytics,
+      );
+      setCreativeSummary(
+        response?.data?.campaigns_analytics?.[1]?.campaign_total_summation,
+      );
       setLoading(false);
     };
     getAllCreatives();
@@ -73,10 +77,14 @@ const AdsAnalytics = () => {
     async function callCreativeAPI(startDate: string, endDate: string) {
       setLoading(true);
       const response = await axios.get(
-        `${apiUrl}ads/creatives/creative-analytics?startdate=${startDate}&enddate=${endDate}`,
+        `${apiUrl}ads/creatives/analytics-by-advertisement?advertisement_id=6a20f96349be327667715019&startdate=${startDate}&enddate=${endDate}`,
       );
-      setAllCreatives(response?.data?.creatives_analytics);
-      setCreativeSummary(response?.data?.ads_total_summation);
+      setAllCreatives(
+        response?.data?.campaigns_analytics?.[1]?.creatives_analytics,
+      );
+      setCreativeSummary(
+        response?.data?.campaigns_analytics?.[1]?.campaign_total_summation,
+      );
       setLoading(false);
     }
 
@@ -132,14 +140,18 @@ const AdsAnalytics = () => {
     setLoading(true);
 
     const response = await axios.get(
-      `${apiUrl}ads/creatives/creative-analytics${
+      `${apiUrl}ads/creatives/analytics-by-advertisement?advertisement_id=6a20f96349be327667715019${
         startdate &&
         endDate &&
-        `?startdate=${formattedStartDate}&enddate=${formattedEndDate}`
+        `&startdate=${formattedStartDate}&enddate=${formattedEndDate}`
       }`,
     );
-    setAllCreatives(response?.data?.creatives_analytics);
-    setCreativeSummary(response?.data?.ads_total_summation);
+    setAllCreatives(
+      response?.data?.campaigns_analytics?.[1]?.creatives_analytics,
+    );
+    setCreativeSummary(
+      response?.data?.campaigns_analytics?.[1]?.campaign_total_summation,
+    );
     setLoading(false);
   };
 
@@ -147,7 +159,7 @@ const AdsAnalytics = () => {
     <Card>
       <CardHeader className="space-y-6">
         <CardTitle>
-          <h2>Ads Analytics</h2>
+          <h2>Binge+ Ads Analytics</h2>
           <p className="font-normal text-base mt-2">
             Get Analytics of all of your advertisement in one place
           </p>
@@ -397,4 +409,4 @@ const AdsAnalytics = () => {
   );
 };
 
-export default AdsAnalytics;
+export default AdsBingeAnalytics;

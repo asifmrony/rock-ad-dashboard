@@ -20,6 +20,13 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     if (email === "asif@rockstreamer.com" && password === "asdf@1234") {
       setIsAuthenticated(true);
       localStorage.setItem("isAuthenticated", "true");
+      localStorage.setItem("bingePlusAdmin", "false");
+      navigate("/");
+      toast.success("Successfully logged in!");
+    } else if (email === "vast_admin@binge" && password === "bingeAD@6776") {
+      setIsAuthenticated(true);
+      localStorage.setItem("isAuthenticated", "true");
+      localStorage.setItem("bingePlusAdmin", "true");
       navigate("/");
       toast.success("Successfully logged in!");
     } else {
@@ -30,6 +37,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const logout = () => {
     setIsAuthenticated(false);
     localStorage.removeItem("isAuthenticated");
+    localStorage.removeItem("bingePlusAdmin");
     navigate("/login");
     toast.success("Successfully logged out!");
   };

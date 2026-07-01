@@ -22,6 +22,7 @@ import { Link, Outlet } from "react-router-dom";
 
 export function DashboardLayout() {
   const { logout } = useAuth();
+  const isBingePlusAdmin = localStorage.getItem("bingePlusAdmin") === "true";
 
   const menuItems = [
     // {
@@ -51,6 +52,14 @@ export function DashboardLayout() {
     },
   ];
 
+  const bingeMenuItems = [
+    {
+      title: "Analytics",
+      icon: ChartNoAxesCombined,
+      url: "/",
+    },
+  ];
+
   return (
     <SidebarProvider>
       <div className="min-h-screen flex w-full bg-slate-100">
@@ -60,16 +69,27 @@ export function DashboardLayout() {
               <SidebarGroupLabel>Navigation</SidebarGroupLabel>
               <SidebarGroupContent>
                 <SidebarMenu>
-                  {menuItems.map((item) => (
-                    <SidebarMenuItem key={item.title}>
-                      <SidebarMenuButton asChild>
-                        <Link to={item.url} className="text-[#646cff]">
-                          <item.icon className="h-4 w-4" />
-                          <span>{item.title}</span>
-                        </Link>
-                      </SidebarMenuButton>
-                    </SidebarMenuItem>
-                  ))}
+                  {isBingePlusAdmin
+                    ? bingeMenuItems.map((item) => (
+                        <SidebarMenuItem key={item.title}>
+                          <SidebarMenuButton asChild>
+                            <Link to={item.url} className="text-[#646cff]">
+                              <item.icon className="h-4 w-4" />
+                              <span>{item.title}</span>
+                            </Link>
+                          </SidebarMenuButton>
+                        </SidebarMenuItem>
+                      ))
+                    : menuItems.map((item) => (
+                        <SidebarMenuItem key={item.title}>
+                          <SidebarMenuButton asChild>
+                            <Link to={item.url} className="text-[#646cff]">
+                              <item.icon className="h-4 w-4" />
+                              <span>{item.title}</span>
+                            </Link>
+                          </SidebarMenuButton>
+                        </SidebarMenuItem>
+                      ))}
                 </SidebarMenu>
               </SidebarGroupContent>
             </SidebarGroup>
