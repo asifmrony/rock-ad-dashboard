@@ -17,6 +17,7 @@ import {
   ChartNoAxesCombined,
   PartyPopper,
   Megaphone,
+  Clapperboard,
 } from "lucide-react";
 import { Link, Outlet } from "react-router-dom";
 
@@ -31,9 +32,14 @@ export function DashboardLayout() {
     //   url: "/dashboard",
     // },
     {
-      title: "Analytics",
+      title: "Vast Analytics",
       icon: ChartNoAxesCombined,
       url: "/",
+    },
+    {
+      title: "Midroll Analytics",
+      icon: Clapperboard,
+      url: "/midroll",
     },
     {
       title: "Ads List",
@@ -54,9 +60,14 @@ export function DashboardLayout() {
 
   const bingeMenuItems = [
     {
-      title: "Analytics",
+      title: "Vast Analytics",
       icon: ChartNoAxesCombined,
       url: "/",
+    },
+    {
+      title: "Midroll Analytics",
+      icon: Clapperboard,
+      url: "/midroll",
     },
   ];
 

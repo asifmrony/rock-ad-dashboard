@@ -147,7 +147,7 @@ const AdsAnalytics = () => {
     <Card>
       <CardHeader className="space-y-6">
         <CardTitle>
-          <h2>Ads Analytics</h2>
+          <h2>Vast Ads Analytics</h2>
           <p className="font-normal text-base mt-2">
             Get Analytics of all of your advertisement in one place
           </p>

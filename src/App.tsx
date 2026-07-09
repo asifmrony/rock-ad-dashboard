@@ -14,6 +14,7 @@ import Advertisers from "./pages/Advertisers";
 import Campaigns from "./pages/Campaigns";
 import EditAd from "./pages/EditAd";
 import AdsHome from "./pages/AdsHome";
+import MidrollAdsAnalytics from "./pages/MidrollAdsAnalytics";
 
 const queryClient = new QueryClient();
 
@@ -35,6 +36,7 @@ const App = () => (
               }
             >
               <Route index element={<AdsHome />} />
+              <Route path="midroll" element={<MidrollAdsAnalytics />} />
               <Route path="ads" element={<AdsList />} />
               <Route path="ads/create" element={<CreateAd />} />
               <Route path="ads/edit/:id" element={<EditAd />} />
