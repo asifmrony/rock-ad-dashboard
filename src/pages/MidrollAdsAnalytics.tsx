@@ -24,6 +24,8 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from "@/components/ui/pagination";
+import { Input } from "@/components/ui/input";
+import { Search } from "lucide-react";
 import { useEffect, useState } from "react";
 import axios from "axios";
 import AdsFiltering from "@/components/AdsFiltering";
@@ -48,6 +50,19 @@ const MidrollAdsAnalytics = () => {
   const [startdate, setStartDate] = useState<Date | undefined>();
   const [endDate, setEndDate] = useState<Date | undefined>();
   const [filterType, setFilterType] = useState<string | undefined>();
+  // `search` tracks the raw input; `debouncedSearch` is what actually hits the API.
+  const [search, setSearch] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
+
+  // Debounce the search box so we fire one request after the user stops typing,
+  // and always jump back to the first page for a fresh query.
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedSearch(search.trim());
+      setPage(1);
+    }, 400);
+    return () => clearTimeout(handler);
+  }, [search]);
 
   // Single source of truth for fetching: re-runs whenever the page or the
   // active date filter changes.
@@ -61,6 +76,9 @@ const MidrollAdsAnalytics = () => {
         if (dateRange) {
           params.append("startdate", dateRange.start);
           params.append("enddate", dateRange.end);
+        }
+        if (debouncedSearch) {
+          params.append("matchName", debouncedSearch);
         }
         const response = await axios.get(
           `${apiUrl}ads/fifa/analytics?${params.toString()}`,
@@ -76,7 +94,7 @@ const MidrollAdsAnalytics = () => {
       }
     };
     fetchAnalytics();
-  }, [page, dateRange]);
+  }, [page, dateRange, debouncedSearch]);
 
   useEffect(() => {
     function getFilteredDate(dateRange: string) {
@@ -203,6 +221,16 @@ const MidrollAdsAnalytics = () => {
         </div>
       </CardHeader>
       <CardContent>
+        <div className="mb-4 relative max-w-sm">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+          <Input
+            type="text"
+            placeholder="Search by match name..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="pl-9"
+          />
+        </div>
         <Table className="text-center border-2 border-slate-100">
           <TableHeader className="text-center bg-slate-500 text-white">
             <TableRow>
