@@ -22,6 +22,8 @@ jobs:
 
       - name: Build
         run: npm run build
+        env:
+          REACT_APP_API_URL: https://api.rockstreamer.com/
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
