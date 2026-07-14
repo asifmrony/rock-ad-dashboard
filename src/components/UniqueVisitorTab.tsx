@@ -13,9 +13,9 @@ import { Plus, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { useEffect, useState } from "react";
 import axios from "axios";
+const visitorUrl = process.env.REACT_APP_VISITOR_URL;
 
-const UNIQUE_USERS_URL =
-  "https://dev-nextstreamer-api.rockstreamer.com/analytics/api/v1/analytics/unique-users";
+const UNIQUE_USERS_URL = `${visitorUrl}analytics/api/v1/analytics/unique-users`;
 
 type ContentInfo = {
   contentId: string;
@@ -205,102 +205,104 @@ export default function UniqueVisitorTab() {
         <>
           {/* Builder: add a content entry to the request payload */}
           <div className="border-2 border-slate-200 rounded-md p-4 bg-slate-50">
-        <p className="text-sm font-medium mb-3">Add Content</p>
-        <div className="flex flex-col sm:flex-row sm:items-end gap-3">
-          <div className="space-y-2 sm:w-40">
-            <Label className="font-normal">Content ID</Label>
-            <Input
-              value={draft.contentId}
-              onChange={(e) =>
-                setDraft((prev) => ({ ...prev, contentId: e.target.value }))
-              }
-              placeholder="e.g. 3612"
-            />
+            <p className="text-sm font-medium mb-3">Add Content</p>
+            <div className="flex flex-col sm:flex-row sm:items-end gap-3">
+              <div className="space-y-2 sm:w-40">
+                <Label className="font-normal">Content ID</Label>
+                <Input
+                  value={draft.contentId}
+                  onChange={(e) =>
+                    setDraft((prev) => ({ ...prev, contentId: e.target.value }))
+                  }
+                  placeholder="e.g. 3612"
+                />
+              </div>
+              <div className="space-y-2 sm:w-56">
+                <Label className="font-normal">Start Time (UTC)</Label>
+                <Input
+                  type="datetime-local"
+                  value={draft.startTime}
+                  onChange={(e) =>
+                    setDraft((prev) => ({ ...prev, startTime: e.target.value }))
+                  }
+                />
+              </div>
+              <div className="space-y-2 sm:w-56">
+                <Label className="font-normal">End Time (UTC)</Label>
+                <Input
+                  type="datetime-local"
+                  value={draft.endTime}
+                  onChange={(e) =>
+                    setDraft((prev) => ({ ...prev, endTime: e.target.value }))
+                  }
+                />
+              </div>
+              <Button type="button" onClick={handleAddEntry} className="gap-1">
+                <Plus className="h-4 w-4" />
+                Add
+              </Button>
+            </div>
           </div>
-          <div className="space-y-2 sm:w-56">
-            <Label className="font-normal">Start Time (UTC)</Label>
-            <Input
-              type="datetime-local"
-              value={draft.startTime}
-              onChange={(e) =>
-                setDraft((prev) => ({ ...prev, startTime: e.target.value }))
-              }
-            />
-          </div>
-          <div className="space-y-2 sm:w-56">
-            <Label className="font-normal">End Time (UTC)</Label>
-            <Input
-              type="datetime-local"
-              value={draft.endTime}
-              onChange={(e) =>
-                setDraft((prev) => ({ ...prev, endTime: e.target.value }))
-              }
-            />
-          </div>
-          <Button type="button" onClick={handleAddEntry} className="gap-1">
-            <Plus className="h-4 w-4" />
-            Add
-          </Button>
-        </div>
-      </div>
 
-      {/* Staged entries that will be sent in the request */}
-      <div className="space-y-2">
-        <div className="flex items-center justify-between">
-          <p className="text-sm font-medium">
-            Staged Content ({entries.length})
-          </p>
-          <Button
-            type="button"
-            onClick={handleSubmit}
-            disabled={loading || !entries.length}
-          >
-            {loading ? "Loading..." : "Get Unique Visitors"}
-          </Button>
-        </div>
-        <Table className="text-center border-2 border-slate-100">
-          <TableHeader className="bg-slate-200">
-            <TableRow>
-              <TableHead className="text-left">Content ID</TableHead>
-              <TableHead className="text-center">Start Time</TableHead>
-              <TableHead className="text-center">End Time</TableHead>
-              <TableHead className="text-right">Action</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {entries.length ? (
-              entries.map((entry, index) => (
-                <TableRow key={`${entry.contentId}-${index}`}>
-                  <TableCell className="font-medium text-left">
-                    {entry.contentId}
-                  </TableCell>
-                  <TableCell className="text-center">
-                    {entry.startTime}
-                  </TableCell>
-                  <TableCell className="text-center">{entry.endTime}</TableCell>
-                  <TableCell className="text-right">
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => handleRemoveEntry(index)}
-                      aria-label="Remove entry"
-                    >
-                      <Trash2 className="h-4 w-4 text-red-500" />
-                    </Button>
-                  </TableCell>
+          {/* Staged entries that will be sent in the request */}
+          <div className="space-y-2">
+            <div className="flex items-center justify-between">
+              <p className="text-sm font-medium">
+                Staged Content ({entries.length})
+              </p>
+              <Button
+                type="button"
+                onClick={handleSubmit}
+                disabled={loading || !entries.length}
+              >
+                {loading ? "Loading..." : "Get Unique Visitors"}
+              </Button>
+            </div>
+            <Table className="text-center border-2 border-slate-100">
+              <TableHeader className="bg-slate-200">
+                <TableRow>
+                  <TableHead className="text-left">Content ID</TableHead>
+                  <TableHead className="text-center">Start Time</TableHead>
+                  <TableHead className="text-center">End Time</TableHead>
+                  <TableHead className="text-right">Action</TableHead>
                 </TableRow>
-              ))
-            ) : (
-              <TableRow>
-                <TableCell colSpan={4} className="h-[80px] text-center">
-                  No content added yet
-                </TableCell>
-              </TableRow>
-            )}
-          </TableBody>
-        </Table>
-      </div>
+              </TableHeader>
+              <TableBody>
+                {entries.length ? (
+                  entries.map((entry, index) => (
+                    <TableRow key={`${entry.contentId}-${index}`}>
+                      <TableCell className="font-medium text-left">
+                        {entry.contentId}
+                      </TableCell>
+                      <TableCell className="text-center">
+                        {entry.startTime}
+                      </TableCell>
+                      <TableCell className="text-center">
+                        {entry.endTime}
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => handleRemoveEntry(index)}
+                          aria-label="Remove entry"
+                        >
+                          <Trash2 className="h-4 w-4 text-red-500" />
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  ))
+                ) : (
+                  <TableRow>
+                    <TableCell colSpan={4} className="h-[80px] text-center">
+                      No content added yet
+                    </TableCell>
+                  </TableRow>
+                )}
+              </TableBody>
+            </Table>
+          </div>
         </>
       )}
 
