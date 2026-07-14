@@ -8,14 +8,6 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
   Pagination,
   PaginationContent,
   PaginationEllipsis,
@@ -28,12 +20,11 @@ import { Input } from "@/components/ui/input";
 import { Search } from "lucide-react";
 import { useEffect, useState } from "react";
 import axios from "axios";
-import AdsFiltering from "@/components/AdsFiltering";
+import AnalyticsFilterBar from "@/components/AnalyticsFilterBar";
+import { useAnalyticsFilters } from "@/hooks/useAnalyticsFilters";
 const apiUrl = process.env.REACT_APP_API_URL;
 
 const LIMIT = 100;
-
-type DateRange = { start: string; end: string } | null;
 
 const MidrollAdsAnalytics = () => {
   const [loading, setLoading] = useState(false);
@@ -45,14 +36,13 @@ const MidrollAdsAnalytics = () => {
     limit: LIMIT,
   });
   const [page, setPage] = useState(1);
-  // Active date filter shared across page changes. `null` means no date params.
-  const [dateRange, setDateRange] = useState<DateRange>(null);
-  const [startdate, setStartDate] = useState<Date | undefined>();
-  const [endDate, setEndDate] = useState<Date | undefined>();
-  const [filterType, setFilterType] = useState<string | undefined>();
   // `search` tracks the raw input; `debouncedSearch` is what actually hits the API.
   const [search, setSearch] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
+
+  // Shared filter mechanics; reset to the first page on any filter change.
+  const filters = useAnalyticsFilters(() => setPage(1));
+  const { dateRange } = filters;
 
   // Debounce the search box so we fire one request after the user stops typing,
   // and always jump back to the first page for a fresh query.
@@ -96,63 +86,6 @@ const MidrollAdsAnalytics = () => {
     fetchAnalytics();
   }, [page, dateRange, debouncedSearch]);
 
-  useEffect(() => {
-    function getFilteredDate(dateRange: string) {
-      const currentDate = new Date();
-      // Subtract 3 months
-      if (dateRange === "lastMonth") {
-        currentDate.setMonth(currentDate.getMonth() - 1);
-      } else if (dateRange === "lastThreeMonth") {
-        currentDate.setMonth(currentDate.getMonth() - 3);
-      } else if (dateRange === "lastSixMonth") {
-        currentDate.setMonth(currentDate.getMonth() - 6);
-      }
-
-      // Format the date as yyyy-mm-dd
-      const year = currentDate.getFullYear();
-      const month = String(currentDate.getMonth() + 1).padStart(2, "0"); // Months are 0-based
-      const day = String(currentDate.getDate()).padStart(2, "0");
-
-      return `${year}-${month}-${day}`;
-    }
-
-    if (filterType && filterType !== "custom") {
-      // Any filter change starts over from the first page.
-      setPage(1);
-      if (filterType === "alltime") {
-        setDateRange({ start: "all", end: "all" });
-      } else if (filterType === "thisMonth") {
-        setDateRange({ start: "", end: "" });
-      } else {
-        // only last 1 | 3 | 6 Months based api
-        setDateRange({
-          start: getFilteredDate(filterType),
-          end: getFilteredDate("today"),
-        });
-      }
-    }
-  }, [filterType]);
-
-  const bdStandardTime = (pickedDate: Date) => {
-    const convertedDate = new Date(pickedDate);
-    // Get the offset in milliseconds for the BST timezone
-    const bstOffset = 6 * 60 * 60 * 1000; // BST is +6 hours from UTC
-    // Add the offset to the timestamp
-    const adjustedTime = new Date(convertedDate.getTime() + bstOffset);
-    // Convert to ISO string
-    const bstIsoString = adjustedTime.toISOString().replace("Z", "+06:00");
-    return bstIsoString.split("T")[0];
-  };
-
-  const handleFilter = () => {
-    if (!startdate || !endDate) return;
-    setPage(1);
-    setDateRange({
-      start: bdStandardTime(startdate),
-      end: bdStandardTime(endDate),
-    });
-  };
-
   const totalPages = pagination?.totalPages || 1;
   const currentPage = pagination?.currentPage || page;
 
@@ -188,37 +121,15 @@ const MidrollAdsAnalytics = () => {
             see analytics of the midroll ads played in the stream
           </p>
         </CardTitle>
-        <div className="flex items-center justify-between flex-row mt-4">
-          <Select
-            value={filterType}
-            onValueChange={(value: string) => {
-              setFilterType(value);
-            }}
-          >
-            <SelectTrigger className="w-[180px]">
-              <SelectValue placeholder="Filter Type" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectGroup>
-                <SelectItem value="thisMonth">This Month</SelectItem>
-                <SelectItem value="lastMonth">Last Month</SelectItem>
-                <SelectItem value="lastThreeMonth">Last 3 Month</SelectItem>
-                <SelectItem value="lastSixMonth">Last 6 Month</SelectItem>
-                <SelectItem value="alltime">Alltime</SelectItem>
-                <SelectItem value="custom">Custom</SelectItem>
-              </SelectGroup>
-            </SelectContent>
-          </Select>
-          {filterType === "custom" && (
-            <AdsFiltering
-              startDate={startdate}
-              setStartDate={setStartDate}
-              endDate={endDate}
-              setEndDate={setEndDate}
-              handleFilter={handleFilter}
-            />
-          )}
-        </div>
+        <AnalyticsFilterBar
+          filterType={filters.filterType}
+          setFilterType={filters.setFilterType}
+          startDate={filters.startdate}
+          setStartDate={filters.setStartDate}
+          endDate={filters.endDate}
+          setEndDate={filters.setEndDate}
+          handleFilter={filters.handleFilter}
+        />
       </CardHeader>
       <CardContent>
         <div className="mb-4 relative max-w-sm">
@@ -346,8 +257,8 @@ const MidrollAdsAnalytics = () => {
         {!loading && totalPages > 1 && (
           <div className="flex items-center justify-between flex-wrap gap-3 mt-4">
             <p className="text-sm text-slate-500">
-              Page {currentPage} of {totalPages} &middot; {pagination?.totalItem}{" "}
-              records
+              Page {currentPage} of {totalPages} &middot;{" "}
+              {pagination?.totalItem} records
             </p>
             <Pagination className="mx-0 w-auto justify-end">
               <PaginationContent>

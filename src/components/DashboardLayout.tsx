@@ -1,5 +1,6 @@
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 import {
   Sidebar,
   SidebarContent,
@@ -19,11 +20,17 @@ import {
   Megaphone,
   Clapperboard,
 } from "lucide-react";
-import { Link, Outlet } from "react-router-dom";
+import { Link, Outlet, useLocation } from "react-router-dom";
 
 export function DashboardLayout() {
   const { logout } = useAuth();
+  const { pathname } = useLocation();
   const isBingePlusAdmin = localStorage.getItem("bingePlusAdmin") === "true";
+
+  // Root ("/") must match exactly; nested routes (e.g. /ads/create) still
+  // highlight their parent nav item.
+  const isActive = (url: string) =>
+    url === "/" ? pathname === "/" : pathname.startsWith(url);
 
   const menuItems = [
     // {
@@ -80,27 +87,28 @@ export function DashboardLayout() {
               <SidebarGroupLabel>Navigation</SidebarGroupLabel>
               <SidebarGroupContent>
                 <SidebarMenu>
-                  {isBingePlusAdmin
-                    ? bingeMenuItems.map((item) => (
+                  {(isBingePlusAdmin ? bingeMenuItems : menuItems).map(
+                    (item) => {
+                      const active = isActive(item.url);
+                      return (
                         <SidebarMenuItem key={item.title}>
-                          <SidebarMenuButton asChild>
-                            <Link to={item.url} className="text-[#646cff]">
+                          <SidebarMenuButton asChild isActive={active}>
+                            <Link
+                              to={item.url}
+                              className={cn(
+                                "text-[#646cff] border-l-4 border-transparent",
+                                active &&
+                                  "bg-[#646cff]/10 border-[#646cff] font-semibold",
+                              )}
+                            >
                               <item.icon className="h-4 w-4" />
                               <span>{item.title}</span>
                             </Link>
                           </SidebarMenuButton>
                         </SidebarMenuItem>
-                      ))
-                    : menuItems.map((item) => (
-                        <SidebarMenuItem key={item.title}>
-                          <SidebarMenuButton asChild>
-                            <Link to={item.url} className="text-[#646cff]">
-                              <item.icon className="h-4 w-4" />
-                              <span>{item.title}</span>
-                            </Link>
-                          </SidebarMenuButton>
-                        </SidebarMenuItem>
-                      ))}
+                      );
+                    },
+                  )}
                 </SidebarMenu>
               </SidebarGroupContent>
             </SidebarGroup>
