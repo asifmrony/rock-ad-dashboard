@@ -16,11 +16,18 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from "@/components/ui/pagination";
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
 import { Search } from "lucide-react";
 import { useEffect, useState } from "react";
 import axios from "axios";
 import AnalyticsFilterBar from "@/components/AnalyticsFilterBar";
+import UniqueVisitorTab from "@/components/UniqueVisitorTab";
 import { useAnalyticsFilters } from "@/hooks/useAnalyticsFilters";
 const apiUrl = process.env.REACT_APP_API_URL;
 
@@ -114,25 +121,31 @@ const MidrollAdsAnalytics = () => {
 
   return (
     <Card>
-      <CardHeader className="space-y-6">
-        <CardTitle>
-          <h2>Midroll Analytics</h2>
-          <p className="font-normal text-base mt-2">
-            see analytics of the midroll ads played in the stream
-          </p>
-        </CardTitle>
-        <AnalyticsFilterBar
-          filterType={filters.filterType}
-          setFilterType={filters.setFilterType}
-          startDate={filters.startdate}
-          setStartDate={filters.setStartDate}
-          endDate={filters.endDate}
-          setEndDate={filters.setEndDate}
-          handleFilter={filters.handleFilter}
-        />
-      </CardHeader>
-      <CardContent>
-        <div className="mb-4 relative max-w-sm">
+      <Tabs defaultValue="play-history">
+        <CardHeader className="space-y-6">
+          <CardTitle>
+            <h2>Midroll Analytics</h2>
+            <p className="font-normal text-base mt-2">
+              see analytics of the midroll ads played in the stream
+            </p>
+          </CardTitle>
+          <TabsList>
+            <TabsTrigger value="play-history">Play History</TabsTrigger>
+            <TabsTrigger value="unique-visitor">Unique Visitor</TabsTrigger>
+          </TabsList>
+        </CardHeader>
+        <CardContent>
+          <TabsContent value="play-history">
+            <AnalyticsFilterBar
+              filterType={filters.filterType}
+              setFilterType={filters.setFilterType}
+              startDate={filters.startdate}
+              setStartDate={filters.setStartDate}
+              endDate={filters.endDate}
+              setEndDate={filters.setEndDate}
+              handleFilter={filters.handleFilter}
+            />
+            <div className="mt-4 mb-4 relative max-w-sm">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
           <Input
             type="text"
@@ -313,9 +326,14 @@ const MidrollAdsAnalytics = () => {
                 </PaginationItem>
               </PaginationContent>
             </Pagination>
-          </div>
-        )}
-      </CardContent>
+              </div>
+            )}
+          </TabsContent>
+          <TabsContent value="unique-visitor">
+            <UniqueVisitorTab />
+          </TabsContent>
+        </CardContent>
+      </Tabs>
     </Card>
   );
 };
