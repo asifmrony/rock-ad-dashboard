@@ -26,6 +26,11 @@ type ContentInfo = {
 // Sample rows the builder is pre-seeded with (already in UTC `Z` format).
 const SEED_CONTENT_INFO: ContentInfo[] = [
   {
+    contentId: "3635",
+    startTime: "2026-07-19T18:00:00Z",
+    endTime: "2026-07-19T22:00:00Z",
+  },
+  {
     contentId: "3636",
     startTime: "2026-07-18T21:00:00Z",
     endTime: "2026-07-18T23:00:00Z",
