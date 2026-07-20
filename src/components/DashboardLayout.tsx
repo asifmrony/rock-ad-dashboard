@@ -21,18 +21,19 @@ import {
   Clapperboard,
 } from "lucide-react";
 import { Link, Outlet, useLocation } from "react-router-dom";
+import { canAccess, getRole } from "@/lib/roles";
 
 export function DashboardLayout() {
   const { logout } = useAuth();
   const { pathname } = useLocation();
-  const isBingePlusAdmin = localStorage.getItem("bingePlusAdmin") === "true";
+  const role = getRole();
 
   // Root ("/") must match exactly; nested routes (e.g. /ads/create) still
   // highlight their parent nav item.
   const isActive = (url: string) =>
     url === "/" ? pathname === "/" : pathname.startsWith(url);
 
-  const menuItems = [
+  const allMenuItems = [
     // {
     //   title: "Dashboard",
     //   icon: LayoutDashboard,
@@ -65,18 +66,8 @@ export function DashboardLayout() {
     },
   ];
 
-  const bingeMenuItems = [
-    {
-      title: "Vast Analytics",
-      icon: ChartNoAxesCombined,
-      url: "/",
-    },
-    {
-      title: "Midroll Analytics",
-      icon: Clapperboard,
-      url: "/midroll",
-    },
-  ];
+  // Only surface the pages this role is allowed to reach.
+  const menuItems = allMenuItems.filter((item) => canAccess(item.url, role));
 
   return (
     <SidebarProvider>
@@ -87,7 +78,7 @@ export function DashboardLayout() {
               <SidebarGroupLabel>Navigation</SidebarGroupLabel>
               <SidebarGroupContent>
                 <SidebarMenu>
-                  {(isBingePlusAdmin ? bingeMenuItems : menuItems).map(
+                  {menuItems.map(
                     (item) => {
                       const active = isActive(item.url);
                       return (

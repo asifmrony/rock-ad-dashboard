@@ -13,6 +13,7 @@ import { Plus, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { useEffect, useState } from "react";
 import axios from "axios";
+import { getRole } from "@/lib/roles";
 const visitorUrl = process.env.REACT_APP_VISITOR_URL;
 
 const UNIQUE_USERS_URL = `${visitorUrl}analytics/api/v1/analytics/unique-users`;
@@ -156,8 +157,8 @@ const toUtcZ = (local: string): string => {
 };
 
 export default function UniqueVisitorTab() {
-  // Binge+ admins can only view results; they don't build the payload.
-  const isBingePlusAdmin = localStorage.getItem("bingePlusAdmin") === "true";
+  // Only the base admin builds the payload; every other role views results only.
+  const isAdmin = getRole() === "admin";
   const [entries, setEntries] = useState<ContentInfo[]>(SEED_CONTENT_INFO);
   const [draft, setDraft] = useState(emptyDraft);
   const [rows, setRows] = useState([]);
@@ -211,17 +212,17 @@ export default function UniqueVisitorTab() {
     fetchUniqueUsers(entries);
   };
 
-  // Binge+ admins can't submit, so load the seeded content automatically.
+  // Non-admins can't submit, so load the seeded content automatically.
   useEffect(() => {
-    if (isBingePlusAdmin) {
+    if (!isAdmin) {
       fetchUniqueUsers(SEED_CONTENT_INFO);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isBingePlusAdmin]);
+  }, [isAdmin]);
 
   return (
     <div className="space-y-6">
-      {!isBingePlusAdmin && (
+      {isAdmin && (
         <>
           {/* Builder: add a content entry to the request payload */}
           <div className="border-2 border-slate-200 rounded-md p-4 bg-slate-50">

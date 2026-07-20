@@ -22,6 +22,14 @@ import {
   TabsList,
   TabsTrigger,
 } from "@/components/ui/tabs";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { Search } from "lucide-react";
 import { useEffect, useState } from "react";
@@ -29,9 +37,16 @@ import axios from "axios";
 import AnalyticsFilterBar from "@/components/AnalyticsFilterBar";
 import UniqueVisitorTab from "@/components/UniqueVisitorTab";
 import { useAnalyticsFilters } from "@/hooks/useAnalyticsFilters";
+import { getRole } from "@/lib/roles";
 const apiUrl = process.env.REACT_APP_API_URL;
 
 const LIMIT = 100;
+
+// Client values as they appear in the API data / query param.
+const CLIENT_OPTIONS = [
+  { label: "PRAN", value: "Pran" },
+  { label: "MTB", value: "MTB" },
+];
 
 const MidrollAdsAnalytics = () => {
   const [loading, setLoading] = useState(false);
@@ -46,6 +61,25 @@ const MidrollAdsAnalytics = () => {
   // `search` tracks the raw input; `debouncedSearch` is what actually hits the API.
   const [search, setSearch] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
+  // Admin picks the client from a dropdown ("all" = no filter). Client roles
+  // are locked to their own client; other roles send no client param.
+  const [clientFilter, setClientFilter] = useState("all");
+
+  const role = getRole();
+  // Admin & Binge+ pick any client from the dropdown; Pran/Mtb are locked to
+  // their own client. All four roles see the Client column.
+  const showClientDropdown = role === "admin" || role === "bingePlus";
+  const showClientColumn =
+    role === "admin" ||
+    role === "bingePlus" ||
+    role === "pran" ||
+    role === "mtb";
+  const roleClient = role === "pran" ? "Pran" : role === "mtb" ? "MTB" : "";
+  const activeClient = showClientDropdown
+    ? clientFilter === "all"
+      ? ""
+      : clientFilter
+    : roleClient;
 
   // Shared filter mechanics; reset to the first page on any filter change.
   const filters = useAnalyticsFilters(() => setPage(1));
@@ -77,6 +111,9 @@ const MidrollAdsAnalytics = () => {
         if (debouncedSearch) {
           params.append("matchName", debouncedSearch);
         }
+        if (activeClient) {
+          params.append("client", activeClient);
+        }
         const response = await axios.get(
           `${apiUrl}ads/fifa/analytics?${params.toString()}`,
         );
@@ -91,10 +128,12 @@ const MidrollAdsAnalytics = () => {
       }
     };
     fetchAnalytics();
-  }, [page, dateRange, debouncedSearch]);
+  }, [page, dateRange, debouncedSearch, activeClient]);
 
   const totalPages = pagination?.totalPages || 1;
   const currentPage = pagination?.currentPage || page;
+  // Base 7 columns, plus the Client column when the role shows it.
+  const colSpan = showClientColumn ? 8 : 7;
 
   const goToPage = (target: number) => {
     if (target < 1 || target > totalPages || target === currentPage) return;
@@ -145,16 +184,41 @@ const MidrollAdsAnalytics = () => {
               setEndDate={filters.setEndDate}
               handleFilter={filters.handleFilter}
             />
-            <div className="mt-4 mb-4 relative max-w-sm">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
-          <Input
-            type="text"
-            placeholder="Search by match name..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="pl-9"
-          />
-        </div>
+            <div className="mt-4 mb-4 flex flex-col sm:flex-row gap-3">
+              <div className="relative w-full sm:max-w-sm">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+                <Input
+                  type="text"
+                  placeholder="Search by match name..."
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  className="pl-9"
+                />
+              </div>
+              {showClientDropdown && (
+                <Select
+                  value={clientFilter}
+                  onValueChange={(value) => {
+                    setClientFilter(value);
+                    setPage(1);
+                  }}
+                >
+                  <SelectTrigger className="w-[180px]">
+                    <SelectValue placeholder="Client" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectGroup>
+                      <SelectItem value="all">All Clients</SelectItem>
+                      {CLIENT_OPTIONS.map((client) => (
+                        <SelectItem key={client.value} value={client.value}>
+                          {client.label}
+                        </SelectItem>
+                      ))}
+                    </SelectGroup>
+                  </SelectContent>
+                </Select>
+              )}
+            </div>
         <Table className="text-center border-2 border-slate-100">
           <TableHeader className="text-center bg-slate-500 text-white">
             <TableRow>
@@ -168,6 +232,18 @@ const MidrollAdsAnalytics = () => {
               >
                 Match
               </TableHead>
+              {showClientColumn && (
+                <TableHead
+                  style={{
+                    position: "sticky",
+                    top: 0,
+                    zIndex: 1,
+                  }}
+                  className="bg-slate-500 text-white text-center"
+                >
+                  Client
+                </TableHead>
+              )}
               <TableHead
                 style={{
                   position: "sticky",
@@ -233,7 +309,7 @@ const MidrollAdsAnalytics = () => {
           <TableBody>
             {loading ? (
               <TableRow>
-                <TableCell colSpan={7} className="h-[100px] text-center">
+                <TableCell colSpan={colSpan} className="h-[100px] text-center">
                   Loading...
                 </TableCell>
               </TableRow>
@@ -243,6 +319,9 @@ const MidrollAdsAnalytics = () => {
                   <TableCell className="font-medium text-left">
                     {ad?.matchName}
                   </TableCell>
+                  {showClientColumn && (
+                    <TableCell className="text-center">{ad?.client}</TableCell>
+                  )}
                   <TableCell className="font-medium text-center">
                     {ad?.date}
                   </TableCell>
@@ -259,7 +338,7 @@ const MidrollAdsAnalytics = () => {
               ))
             ) : (
               <TableRow>
-                <TableCell colSpan={7} className="h-[100px] text-center">
+                <TableCell colSpan={colSpan} className="h-[100px] text-center">
                   No data found
                 </TableCell>
               </TableRow>
