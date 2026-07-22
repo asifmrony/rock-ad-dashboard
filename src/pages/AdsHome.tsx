@@ -3,8 +3,9 @@ import AdsAnalytics from "./AdsAnalytics";
 
 function AdsHome() {
   const isBingePlusAdmin = localStorage.getItem("bingePlusAdmin") === "true";
+  const isBkashAdmin = localStorage.getItem("isBkashAdmin") === "true";
 
-  if (isBingePlusAdmin) return <AdsBingeAnalytics />;
+  if (isBingePlusAdmin || isBkashAdmin) return <AdsBingeAnalytics />;
 
   return <AdsAnalytics />;
 }
