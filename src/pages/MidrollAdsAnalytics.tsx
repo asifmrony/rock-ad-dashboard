@@ -16,12 +16,7 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from "@/components/ui/pagination";
-import {
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-} from "@/components/ui/tabs";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Select,
   SelectContent,
@@ -75,6 +70,8 @@ const MidrollAdsAnalytics = () => {
     role === "pran" ||
     role === "mtb";
   const roleClient = role === "pran" ? "Pran" : role === "mtb" ? "MTB" : "";
+  // Pran/Mtb only see Play History; Unique Visitor stays admin & Binge+ only.
+  const showUniqueVisitorTab = role === "admin" || role === "bingePlus";
   const activeClient = showClientDropdown
     ? clientFilter === "all"
       ? ""
@@ -105,8 +102,8 @@ const MidrollAdsAnalytics = () => {
         params.append("page", String(page));
         params.append("limit", String(LIMIT));
         if (dateRange) {
-          params.append("startdate", dateRange.start);
-          params.append("enddate", dateRange.end);
+          params.append("startDate", dateRange.start);
+          params.append("endDate", dateRange.end);
         }
         if (debouncedSearch) {
           params.append("matchName", debouncedSearch);
@@ -170,7 +167,9 @@ const MidrollAdsAnalytics = () => {
           </CardTitle>
           <TabsList>
             <TabsTrigger value="play-history">Play History</TabsTrigger>
-            <TabsTrigger value="unique-visitor">Unique Visitor</TabsTrigger>
+            {showUniqueVisitorTab && (
+              <TabsTrigger value="unique-visitor">Unique Visitor</TabsTrigger>
+            )}
           </TabsList>
         </CardHeader>
         <CardContent>
@@ -219,198 +218,214 @@ const MidrollAdsAnalytics = () => {
                 </Select>
               )}
             </div>
-        <Table className="text-center border-2 border-slate-100">
-          <TableHeader className="text-center bg-slate-500 text-white">
-            <TableRow>
-              <TableHead
-                style={{
-                  position: "sticky",
-                  top: 0,
-                  zIndex: 1,
-                }}
-                className="bg-slate-500 text-white text-left"
-              >
-                Match
-              </TableHead>
-              {showClientColumn && (
-                <TableHead
-                  style={{
-                    position: "sticky",
-                    top: 0,
-                    zIndex: 1,
-                  }}
-                  className="bg-slate-500 text-white text-center"
-                >
-                  Client
-                </TableHead>
-              )}
-              <TableHead
-                style={{
-                  position: "sticky",
-                  top: 0,
-                  zIndex: 1,
-                }}
-                className="bg-slate-500 text-white text-center"
-              >
-                Date
-              </TableHead>
-              <TableHead
-                style={{
-                  position: "sticky",
-                  top: 0,
-                  zIndex: 1,
-                }}
-                className="bg-slate-500 text-white text-center"
-              >
-                Ad Name
-              </TableHead>
-              <TableHead
-                style={{
-                  position: "sticky",
-                  top: 0,
-                  zIndex: 1,
-                }}
-                className="bg-slate-500 text-white text-center"
-              >
-                Break Type
-              </TableHead>
-              <TableHead
-                style={{
-                  position: "sticky",
-                  top: 0,
-                  zIndex: 1,
-                }}
-                className="bg-slate-500 text-white text-center"
-              >
-                Started At
-              </TableHead>
-              <TableHead
-                style={{
-                  position: "sticky",
-                  top: 0,
-                  zIndex: 1,
-                }}
-                className="bg-slate-500 text-white text-center"
-              >
-                Duration
-              </TableHead>
-              <TableHead
-                style={{
-                  position: "sticky",
-                  top: 0,
-                  zIndex: 1,
-                }}
-                className="bg-slate-500 text-white text-center"
-              >
-                Duration (ms)
-              </TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {loading ? (
-              <TableRow>
-                <TableCell colSpan={colSpan} className="h-[100px] text-center">
-                  Loading...
-                </TableCell>
-              </TableRow>
-            ) : allCreatives?.length ? (
-              allCreatives?.map((ad) => (
-                <TableRow key={ad._id || ad.id}>
-                  <TableCell className="font-medium text-left">
-                    {ad?.matchName}
-                  </TableCell>
-                  {showClientColumn && (
-                    <TableCell className="text-center">{ad?.client}</TableCell>
-                  )}
-                  <TableCell className="font-medium text-center">
-                    {ad?.date}
-                  </TableCell>
-                  <TableCell className="text-center">{ad?.adName}</TableCell>
-                  <TableCell className="text-center">{ad?.breakType}</TableCell>
-                  <TableCell className="text-center">{ad?.playedAt}</TableCell>
-                  <TableCell className="text-center">
-                    {ad?.durationLabel}
-                  </TableCell>
-                  <TableCell className="text-center">
-                    {ad?.durationMs}
-                  </TableCell>
-                </TableRow>
-              ))
-            ) : (
-              <TableRow>
-                <TableCell colSpan={colSpan} className="h-[100px] text-center">
-                  No data found
-                </TableCell>
-              </TableRow>
-            )}
-          </TableBody>
-        </Table>
-
-        {!loading && totalPages > 1 && (
-          <div className="flex items-center justify-between flex-wrap gap-3 mt-4">
-            <p className="text-sm text-slate-500">
-              Page {currentPage} of {totalPages} &middot;{" "}
-              {pagination?.totalItem} records
-            </p>
-            <Pagination className="mx-0 w-auto justify-end">
-              <PaginationContent>
-                <PaginationItem>
-                  <PaginationPrevious
-                    href="#"
-                    onClick={(e) => {
-                      e.preventDefault();
-                      goToPage(currentPage - 1);
+            <Table className="text-center border-2 border-slate-100">
+              <TableHeader className="text-center bg-slate-500 text-white">
+                <TableRow>
+                  <TableHead
+                    style={{
+                      position: "sticky",
+                      top: 0,
+                      zIndex: 1,
                     }}
-                    className={
-                      currentPage <= 1
-                        ? "pointer-events-none opacity-50"
-                        : "cursor-pointer"
-                    }
-                  />
-                </PaginationItem>
-                {getPageNumbers().map((item, index) =>
-                  item === "ellipsis" ? (
-                    <PaginationItem key={`ellipsis-${index}`}>
-                      <PaginationEllipsis />
-                    </PaginationItem>
-                  ) : (
-                    <PaginationItem key={item}>
-                      <PaginationLink
+                    className="bg-slate-500 text-white text-left"
+                  >
+                    Match
+                  </TableHead>
+                  {showClientColumn && (
+                    <TableHead
+                      style={{
+                        position: "sticky",
+                        top: 0,
+                        zIndex: 1,
+                      }}
+                      className="bg-slate-500 text-white text-center"
+                    >
+                      Client
+                    </TableHead>
+                  )}
+                  <TableHead
+                    style={{
+                      position: "sticky",
+                      top: 0,
+                      zIndex: 1,
+                    }}
+                    className="bg-slate-500 text-white text-center"
+                  >
+                    Date
+                  </TableHead>
+                  <TableHead
+                    style={{
+                      position: "sticky",
+                      top: 0,
+                      zIndex: 1,
+                    }}
+                    className="bg-slate-500 text-white text-center"
+                  >
+                    Ad Name
+                  </TableHead>
+                  <TableHead
+                    style={{
+                      position: "sticky",
+                      top: 0,
+                      zIndex: 1,
+                    }}
+                    className="bg-slate-500 text-white text-center"
+                  >
+                    Break Type
+                  </TableHead>
+                  <TableHead
+                    style={{
+                      position: "sticky",
+                      top: 0,
+                      zIndex: 1,
+                    }}
+                    className="bg-slate-500 text-white text-center"
+                  >
+                    Started At
+                  </TableHead>
+                  <TableHead
+                    style={{
+                      position: "sticky",
+                      top: 0,
+                      zIndex: 1,
+                    }}
+                    className="bg-slate-500 text-white text-center"
+                  >
+                    Duration
+                  </TableHead>
+                  <TableHead
+                    style={{
+                      position: "sticky",
+                      top: 0,
+                      zIndex: 1,
+                    }}
+                    className="bg-slate-500 text-white text-center"
+                  >
+                    Duration (ms)
+                  </TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {loading ? (
+                  <TableRow>
+                    <TableCell
+                      colSpan={colSpan}
+                      className="h-[100px] text-center"
+                    >
+                      Loading...
+                    </TableCell>
+                  </TableRow>
+                ) : allCreatives?.length ? (
+                  allCreatives?.map((ad) => (
+                    <TableRow key={ad._id || ad.id}>
+                      <TableCell className="font-medium text-left">
+                        {ad?.matchName}
+                      </TableCell>
+                      {showClientColumn && (
+                        <TableCell className="text-center">
+                          {ad?.client}
+                        </TableCell>
+                      )}
+                      <TableCell className="font-medium text-center">
+                        {ad?.date}
+                      </TableCell>
+                      <TableCell className="text-center">
+                        {ad?.adName}
+                      </TableCell>
+                      <TableCell className="text-center">
+                        {ad?.breakType}
+                      </TableCell>
+                      <TableCell className="text-center">
+                        {ad?.playedAt}
+                      </TableCell>
+                      <TableCell className="text-center">
+                        {ad?.durationLabel}
+                      </TableCell>
+                      <TableCell className="text-center">
+                        {ad?.durationMs}
+                      </TableCell>
+                    </TableRow>
+                  ))
+                ) : (
+                  <TableRow>
+                    <TableCell
+                      colSpan={colSpan}
+                      className="h-[100px] text-center"
+                    >
+                      No data found
+                    </TableCell>
+                  </TableRow>
+                )}
+              </TableBody>
+            </Table>
+
+            {!loading && totalPages > 1 && (
+              <div className="flex items-center justify-between flex-wrap gap-3 mt-4">
+                <p className="text-sm text-slate-500">
+                  Page {currentPage} of {totalPages} &middot;{" "}
+                  {pagination?.totalItem} records
+                </p>
+                <Pagination className="mx-0 w-auto justify-end">
+                  <PaginationContent>
+                    <PaginationItem>
+                      <PaginationPrevious
                         href="#"
-                        isActive={item === currentPage}
                         onClick={(e) => {
                           e.preventDefault();
-                          goToPage(item);
+                          goToPage(currentPage - 1);
                         }}
-                        className="cursor-pointer"
-                      >
-                        {item}
-                      </PaginationLink>
+                        className={
+                          currentPage <= 1
+                            ? "pointer-events-none opacity-50"
+                            : "cursor-pointer"
+                        }
+                      />
                     </PaginationItem>
-                  ),
-                )}
-                <PaginationItem>
-                  <PaginationNext
-                    href="#"
-                    onClick={(e) => {
-                      e.preventDefault();
-                      goToPage(currentPage + 1);
-                    }}
-                    className={
-                      currentPage >= totalPages
-                        ? "pointer-events-none opacity-50"
-                        : "cursor-pointer"
-                    }
-                  />
-                </PaginationItem>
-              </PaginationContent>
-            </Pagination>
+                    {getPageNumbers().map((item, index) =>
+                      item === "ellipsis" ? (
+                        <PaginationItem key={`ellipsis-${index}`}>
+                          <PaginationEllipsis />
+                        </PaginationItem>
+                      ) : (
+                        <PaginationItem key={item}>
+                          <PaginationLink
+                            href="#"
+                            isActive={item === currentPage}
+                            onClick={(e) => {
+                              e.preventDefault();
+                              goToPage(item);
+                            }}
+                            className="cursor-pointer"
+                          >
+                            {item}
+                          </PaginationLink>
+                        </PaginationItem>
+                      ),
+                    )}
+                    <PaginationItem>
+                      <PaginationNext
+                        href="#"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          goToPage(currentPage + 1);
+                        }}
+                        className={
+                          currentPage >= totalPages
+                            ? "pointer-events-none opacity-50"
+                            : "cursor-pointer"
+                        }
+                      />
+                    </PaginationItem>
+                  </PaginationContent>
+                </Pagination>
               </div>
             )}
           </TabsContent>
-          <TabsContent value="unique-visitor">
-            <UniqueVisitorTab />
-          </TabsContent>
+          {showUniqueVisitorTab && (
+            <TabsContent value="unique-visitor">
+              <UniqueVisitorTab />
+            </TabsContent>
+          )}
         </CardContent>
       </Tabs>
     </Card>
